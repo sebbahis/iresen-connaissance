@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { createHash } from 'node:crypto';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,6 +47,12 @@ await build({
   legalComments: 'linked',
   define: { __PORTAL_SETTINGS__: JSON.stringify(settings) }
 });
+for (const [pageName, programName] of [['index.html', 'portail.js'], ['auth-retour.html', 'auth-retour.js']]) {
+  const program = await readFile(join(output, programName));
+  const version = createHash('sha256').update(program).digest('hex').slice(0,16);
+  const page = await readFile(join(output, pageName), 'utf8');
+  await writeFile(join(output, pageName), page.replace('./' + programName, './' + programName + '?v=' + version));
+}
 await writeFile(join(output, '.nojekyll'), '');
 const html = await readFile(join(output, 'index.html'), 'utf8');
 if (/src=["'](?:\/|https?:)|data\.js/.test(html)) throw new Error('Les ressources de la page doivent être locales et relatives.');
