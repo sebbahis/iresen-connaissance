@@ -14,6 +14,7 @@ const scopes = ['https://graph.microsoft.com/Sites.Selected'];
 const page = new URL('./', document.baseURI);
 let microsoft;
 let account;
+let stage = 'initialisation';
 
 function showGate(text, { signIn = false, reread = false } = {}) {
   portal.hidden = true;
@@ -30,6 +31,7 @@ function tenantAccount(candidate) {
 }
 
 async function token() {
+  stage = 'autorisation_microsoft';
   const result = await microsoft.acquireTokenSilent({ account, scopes });
   if (!tenantAccount(result.account) || !result.accessToken) throw new Error('Compte Microsoft non autorisé.');
   return result.accessToken;
@@ -47,12 +49,18 @@ function loginError(error) {
   } else {
     showGate('L’accès au portail n’a pas abouti. Vérifiez votre connexion ou réessayez avec votre compte IRESEN.', { signIn: true, reread: !!account });
   }
+  const codes = [error?.errorCode, error?.subError, error?.name]
+    .filter(value => typeof value === 'string' && /^[a-zA-Z0-9_]{1,90}$/.test(value));
+  const microsoftCode = /AADSTS\d{4,9}/.exec(error?.message ?? '')?.[0];
+  if (microsoftCode) codes.unshift(microsoftCode);
+  message.textContent += ' Référence de diagnostic ' + stage + ' / ' + (codes.join(' / ') || 'erreur_inconnue') + '.';
 }
 
 async function openPortal() {
   showGate('Vérification de vos droits et lecture du classeur SharePoint…');
   try {
     const reader = new SharePointReader({ ...config, getToken: token });
+    stage = 'lecture_sharepoint';
     const file = await reader.workbook(AbortSignal.timeout(35_000));
     let snapshot;
     try {
@@ -99,6 +107,7 @@ async function start() {
       return;
     }
     microsoft.setActiveAccount(account);
+    stage = 'session_connectee';
     await openPortal();
   } catch (error) {
     loginError(error);
@@ -109,6 +118,7 @@ login.addEventListener('click', async () => {
   login.disabled = true;
   message.textContent = 'Ouverture de la connexion Microsoft…';
   try {
+    stage = 'connexion_microsoft';
     await microsoft.loginRedirect({ scopes, prompt: 'select_account', redirectStartPage: location.href });
   } catch (error) {
     loginError(error);
