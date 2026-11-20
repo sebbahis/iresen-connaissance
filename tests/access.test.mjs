@@ -13,6 +13,23 @@ const transport = request => new SharePointReader({
   request
 });
 
+test('le transport natif conserve le contexte du navigateur', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = function () {
+    assert.equal(this, globalThis);
+    return Promise.resolve(new Response(null, { status: 403 }));
+  };
+  try {
+    const reader = new SharePointReader({
+      driveId: 'b!example', workbookId: 'workbook', folderId: 'folder',
+      getToken: async () => 'test-token'
+    });
+    await assert.rejects(reader.workbook(), { status: 403 });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('un refus de lecture SharePoint arrête la requête avant tout téléchargement', async () => {
   let requests = 0;
   const reader = transport(async (url, init) => {

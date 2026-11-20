@@ -69,7 +69,7 @@ async function limitedBuffer(response) {
 }
 
 export class SharePointReader {
-  constructor({ driveId, workbookId, folderId, getToken, request = fetch }) {
+  constructor({ driveId, workbookId, folderId, getToken, request = globalThis.fetch.bind(globalThis) }) {
     if (![driveId, workbookId, folderId].every(id => typeof id === 'string' && GRAPH_ID.test(id))) {
       throw new Error('Les références SharePoint du portail sont incomplètes.');
     }
