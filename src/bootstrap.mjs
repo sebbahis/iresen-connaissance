@@ -34,6 +34,7 @@ async function token() {
   stage = 'autorisation_microsoft';
   const result = await microsoft.acquireTokenSilent({ account, scopes });
   if (!tenantAccount(result.account) || !result.accessToken) throw new Error('Compte Microsoft non autorisé.');
+  stage = 'lecture_sharepoint';
   return result.accessToken;
 }
 
@@ -53,6 +54,8 @@ function loginError(error) {
     .filter(value => typeof value === 'string' && /^[a-zA-Z0-9_]{1,90}$/.test(value));
   const microsoftCode = /AADSTS\d{4,9}/.exec(error?.message ?? '')?.[0];
   if (microsoftCode) codes.unshift(microsoftCode);
+  const typeDetail = /^(Cannot (?:read|set) properties of (?:undefined|null) \((?:reading|setting) '[a-zA-Z0-9_]{1,60}'\)|[a-zA-Z0-9_.]{1,80} is not a function|Failed to fetch)$/.exec(error?.message ?? '')?.[0];
+  if (typeDetail) codes.push(typeDetail);
   message.textContent += ' Référence de diagnostic ' + stage + ' / ' + (codes.join(' / ') || 'erreur_inconnue') + '.';
 }
 
@@ -64,11 +67,13 @@ async function openPortal() {
     const file = await reader.workbook(AbortSignal.timeout(35_000));
     let snapshot;
     try {
+      stage = 'lecture_classeur';
       snapshot = await readWorkbook(file.bytes, { ...file, auditDate: config.auditDate });
     } catch {
       showGate('Le classeur est accessible, mais sa structure ne correspond plus aux tableaux du portail.', { reread: true });
       return;
     }
+    stage = 'affichage_portail';
     mountPortal({
       snapshot,
       spreadsheetUrl: file.url,
