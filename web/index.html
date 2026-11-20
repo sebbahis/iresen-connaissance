@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#006bb6">
+  <meta name="description" content="La base de connaissances IRESEN : projets, publications, brevets, laboratoires et documents de référence.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com https://rabatcommerce.sharepoint.com https://rabatcommerce-my.sharepoint.com; frame-src 'self' https://login.microsoftonline.com; object-src 'none'; base-uri 'none'">
+  <meta name="robots" content="noindex,nofollow">
+  <title>IRESEN · Base de connaissances</title>
+  <link rel="icon" href="assets/iresen.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="./portail.js"></script>
+</head>
+<body>
+  <a class="skip" href="#content">Aller au contenu</a>
+  <section id="auth-screen" class="auth-screen" aria-labelledby="auth-heading">
+    <div class="auth-brand">
+      <img src="assets/iresen.svg" alt="IRESEN">
+      <h1 id="auth-heading">Base de connaissances IRESEN</h1>
+      <p>Retrouvez les projets, productions scientifiques et documents de référence de l’Institut.</p>
+    </div>
+    <div class="auth-panel">
+      <h2>Connexion Microsoft</h2>
+      <p id="auth-message" role="status" aria-live="polite">Vérification de la configuration…</p>
+      <button class="btn primary" id="microsoft-login" hidden>Se connecter avec Microsoft</button>
+      <button class="btn" id="retry-read" hidden>Relire le classeur</button>
+    </div>
+  </section>
+  <div class="layout" id="portal" hidden>
+    <button id="scrim" class="scrim" aria-label="Fermer la navigation" hidden></button>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#/accueil"><img src="assets/iresen.svg" alt="IRESEN — Institut de Recherche en Énergie Solaire et Énergies Nouvelles"><span>BASE DE CONNAISSANCES</span></a>
+      <p class="nav-label">Explorer</p>
+      <nav id="navigation" aria-label="Rubriques de la base"></nav>
+      <div class="sidebar-foot"><a href="#/aide">Bien utiliser la base</a><span>15 ans de recherche & d’impact</span><small>Données documentées · Périmètres distincts</small></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button id="menu" class="icon-button mobile-only" aria-label="Ouvrir la navigation" aria-expanded="false"></button>
+        <span id="breadcrumb" class="breadcrumb">IRESEN / Accueil</span>
+        <label class="global-search"><span id="search-icon"></span><input id="global-search" type="search" placeholder="Rechercher dans toute la base…" aria-label="Rechercher dans toute la base"><kbd>Ctrl K</kbd></label>
+        <a class="top-help" href="#/aide" aria-label="Aide">?</a>
+        <button class="btn small" id="sign-out">Se déconnecter</button>
+      </header>
+      <main id="content" tabindex="-1"></main>
+      <footer id="footer"></footer>
+    </div>
+  </div>
+  <dialog id="detail" aria-labelledby="detail-title"><div id="detail-content"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript>Activez JavaScript pour consulter la base. Les documents restent accessibles dans SharePoint.</noscript>
+</body>
+</html>
